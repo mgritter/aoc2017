@@ -19,7 +19,7 @@ extern crate itertools;
 use itertools::Itertools;
 use std::cmp;
 
-fn divides( a : i32, b : i32 ) -> bool {
+fn divides( a : &i32, b : &i32 ) -> bool {
     // Fortunately, the input includes no zeros.
     return ( a % b == 0 ) || ( b % a == 0 );
 }
@@ -39,7 +39,7 @@ fn main() {
         println!( "min={} max={}", max, min );
 
         let (a,b) = num_cells.iter().tuple_combinations::<(_,_)>()
-            .find( |z| divides( *(z.0), *(z.1) ) )
+            .find( |z| divides( z.0, z.1 ) )
             .expect( "Couldn't find divisible pair." );
         println!( "a={}, b={}", a, b );
         csum2 += cmp::max( a, b ) / cmp::min( a, b );
