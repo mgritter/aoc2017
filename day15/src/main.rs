@@ -10,6 +10,10 @@ fn main() {
     let mut count = 0;
     let num_trials = 5000000; // 40000000
     for _ in 0..num_trials {
+        // Explanation:
+        // While takes an expression.
+        // A code block in { } is an expression.
+        // The second {} is the body of the loop.
         while {
             a = (a * a_mult) % 2147483647;
             a % 4 != 0
