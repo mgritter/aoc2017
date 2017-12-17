@@ -23,7 +23,7 @@ fn main() {
     let mut zero_follower = 0;
     cur_pos = 0;
     
-    for i in 1..50000000 {
+    for i in 1..50000001 {
         cur_pos = ( cur_pos + INPUT ) % len;
         // Insertion increases length by one
         len += 1;
