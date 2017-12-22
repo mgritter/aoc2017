@@ -89,6 +89,10 @@ fn main() {
                 dy = -dy;
                 
                 // Clean
+                // infected.remove( &(x,y) );
+                // Strangely, it's about 10% faster to keep the
+                // key in the hashmap than to remove it.
+                // 1.019/1.042/1.051 vs 1.179/1.160/1.156
                 infected.insert( (x,y), '.' );
             }
             _ => {
