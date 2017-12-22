@@ -28,7 +28,7 @@ use std::collections::HashMap;
 use std::cmp::max;
 
 fn main() {
-    let mut infected : HashMap<(i32,i32),bool> = HashMap::new();
+    let mut infected : HashMap<(i32,i32),char> = HashMap::new();
     let mut height = 0;
     let mut width = 0;
     
@@ -37,7 +37,7 @@ fn main() {
         for (x, c) in row.chars().enumerate() {
             width = max( width, x );
             if c == '#' {
-                infected.insert( (x as i32, y as i32), true );
+                infected.insert( (x as i32, y as i32), '#' );
             }
         }
     }
@@ -49,32 +49,52 @@ fn main() {
     let mut dy = -1;
     let mut infected_count = 0;
     
-    for iter in 0..10000 {
-        if infected.get( &(x,y) ).cloned().unwrap_or( false ) {
-            // Turn right
-            match (dx,dy) {
-                (1,0) => { dx = 0; dy = 1; },
-                (0,1) => { dx = -1; dy = 0; },
-                (-1, 0) => { dx = 0; dy = -1; },
-                (0,-1) => { dx = 1; dy = 0; }
-                (_,_) => { panic!( "Unknown direction!" ); }
+    for iter in 0..10000000 {
+        match infected.get( &(x,y) ).cloned().unwrap_or( '.' ) {
+            '#' => {
+                // Turn right
+                match (dx,dy) {
+                    (1,0) => { dx = 0; dy = 1; },
+                    (0,1) => { dx = -1; dy = 0; },
+                    (-1, 0) => { dx = 0; dy = -1; },
+                    (0,-1) => { dx = 1; dy = 0; }
+                    (_,_) => { panic!( "Unknown direction!" ); }
+                }
+                // Flag
+                infected.insert( (x,y), 'F' );
+            },
+            '.' => {
+                // Turn left
+                match (dx,dy) {
+                    (1,0) => { dx = 0; dy = -1; },
+                    (0,1) => { dx = 1; dy = 0; },
+                    (-1, 0) => { dx = 0; dy = 1; },
+                    (0,-1) => { dx = -1; dy = 0; }
+                    (_,_) => { panic!( "Unknown direction!" ); }
+                }
+                
+                // Weaken
+                infected.insert( (x,y), 'W' );
+            },
+            'W' => {
+                // No change in direction
+                
+                // Infect
+                infected.insert( (x,y), '#' );
+                infected_count += 1;
+            },
+            'F' => {
+                // Reverse direction
+                dx = -dx;
+                dy = -dy;
+                
+                // Clean
+                infected.insert( (x,y), '.' );
             }
-            // Clean
-            infected.insert( (x,y), false );
-            
-        } else {
-            // Turn left
-            match (dx,dy) {
-                (1,0) => { dx = 0; dy = -1; },
-                (0,1) => { dx = 1; dy = 0; },
-                (-1, 0) => { dx = 0; dy = 1; },
-                (0,-1) => { dx = -1; dy = 0; }
-                (_,_) => { panic!( "Unknown direction!" ); }
+            _ => {
+                panic!( "Unknown cell state." );
             }
 
-            // Infect
-            infected.insert( (x,y), true );
-            infected_count += 1;
         }
         x += dx;
         y += dy;
