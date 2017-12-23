@@ -6,22 +6,28 @@ mul b 100
 sub b -100000
 set c b
 sub c -17000
+// Optimize here, pc 8
 set f 1
 set d 2
 set e 2
 set g d
 mul g e
 sub g b
+// g = d * e - b
 jnz g 2
 set f 0
+// f = 0 iff d divides b
 sub e -1
 set g e
 sub g b
+// loop until e == b
 jnz g -8
 sub d -1
 set g d
 sub g b
+// loop until d == b
 jnz g -13
+// End here at PC=24
 jnz f 2
 sub h -1
 set g b
@@ -49,6 +55,15 @@ struct Program<'a> {
     num_mult : usize
 }
 
+fn is_prime( n: i64 ) -> bool {
+    for d in 2..((n as f64).sqrt() as i64) {
+        if n % d == 0 {
+            return false;
+        }
+    }
+    true
+}
+
 impl<'a> Program<'a> {
     fn create( program : &'a Vec<Command> ) -> Program<'a> {
         let mut p = Program {
@@ -59,7 +74,7 @@ impl<'a> Program<'a> {
             num_mult : 0
         };
         // Part two
-        //p.registers.insert( 'a', 1 );
+        p.registers.insert( 'a', 1 );
         p
     }
     
@@ -86,6 +101,30 @@ impl<'a> Program<'a> {
         println!( "{:?} | {} {:?}", self.registers,
                                     self.pc, self.program[self.pc] );
 
+        if self.pc == 8 {
+            // Bypass primality checking
+            let b = * self.registers.get( &'b' ).unwrap();
+            if is_prime( b ) {
+                println!( "Prime check: {}, prime, f=1", b ); 
+                self.registers.insert( 'f', 1 );
+            } else {
+                // Some divisor would be found, and f set to zero
+                println!( "Prime check: {}, not prime, f=0", b ); 
+                self.registers.insert( 'f', 0 );
+            }
+            self.pc = 24;
+            return;
+        }
+        // if self.pc == 24 {            
+        //    // f = 1 if b is prime f = 0 otherwise
+        //    println!( "Prime check ended!" );
+        //    if *self.registers.get( &'f' ).unwrap() == 1 {
+        //        assert!( is_prime( * self.registers.get( &'b' ).unwrap() ) );
+        //    } else {
+        //        assert!( !is_prime( * self.registers.get( &'b' ).unwrap() ) );
+        //    }
+        //}
+        
         match self.program[self.pc] {
             Command::Set( reg, ref arg ) => {
                 let val = self.parse_argument( arg );
@@ -131,6 +170,9 @@ fn main() {
     for line in INPUT.split( "\n" ) {
         let tok : Vec<&str> = line.split( " ").collect();
         let reg = tok[1].chars().nth( 0 ).unwrap();
+        if tok[0] == "//" {
+            continue;
+        }
         program.push( 
             match tok[0] {
                 "set" => Command::Set( reg, tok[2].to_string() ),
