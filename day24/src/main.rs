@@ -67,24 +67,20 @@ fn dfs_bridge( remaining_components : &Vec<(u32,u32)>,
     
     for i in 0..remaining_components.len() {
         let (a,b) = remaining_components[i];
-        if a == last_port {
+        if a == last_port || b == last_port {
             let mut c2 = remaining_components.clone();
             c2.swap_remove( i );
-            let (len, stren) = dfs_bridge( &c2, b );
+            let (len,stren) = dfs_bridge(
+                &c2,
+                if a == last_port {
+                    b
+                } else {
+                    a
+                }
+            );
             let my_len = len + 1;
             let my_str = stren + a + b;
-            if my_len > best_len {
-                best_len = my_len;
-                best_str = my_str;
-            } else if my_len == best_len {
-                best_str = max( best_str, my_str );
-            }
-        } else if b == last_port {
-            let mut c2 = remaining_components.clone();
-            c2.swap_remove( i );
-            let (len, stren) = dfs_bridge( &c2, a );
-            let my_len = len + 1;
-            let my_str = stren + a + b;
+            // Part 2: best length, tiebreak by strength
             if my_len > best_len {
                 best_len = my_len;
                 best_str = my_str;
